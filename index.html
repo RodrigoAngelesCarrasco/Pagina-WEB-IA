@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Actividad — Efectos con JavaScript</title>
+
+  <style>
+    :root{--bg:#f4f7f2;--card:#fff;--accent:#2b8aef;--muted:#666}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,var(--bg),#e8efe9);display:flex;align-items:flex-start;justify-content:center;padding:32px}
+    .app{width:960px;max-width:96%;background:var(--card);box-shadow:0 8px 30px rgba(15,20,30,.08);border-radius:12px;padding:20px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+    header h1{font-size:20px;margin:0}
+    .layout{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    .gallery{background:linear-gradient(180deg,#fbfff8,#f6fff0);padding:14px;border-radius:10px}
+    .main-image{position:relative;overflow:hidden;border-radius:8px;height:420px;display:flex;align-items:center;justify-content:center;background:#ddd}
+    .main-image img{max-width:100%;max-height:100%;transition:transform .35s ease,filter .25s ease;border-radius:6px}
+    .thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto}
+    .thumbs img{width:72px;height:48px;object-fit:cover;border-radius:6px;cursor:pointer;opacity:.85;transition:transform .15s ease,opacity .15s}
+    .thumbs img.active{outline:3px solid var(--accent);opacity:1;transform:scale(1.02)}
+    .controls{background:#fff;padding:12px;border-radius:8px;box-shadow:inset 0 1px 0 rgba(0,0,0,.02)}
+    .row{display:flex;gap:8px;align-items:center}
+    button{background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
+    .btn-ghost{background:#f3f7fb;color:var(--muted);border:1px solid #eef3fb}
+    label{font-size:13px;color:var(--muted)}
+    input[type=range]{width:100%}
+    .info-box{margin-top:12px;padding:10px;background:#fcffec;border-radius:8px;border:1px solid #eef6de;font-size:13px;color:#333}
+    .small{font-size:13px;color:var(--muted)}
+    .controls .section{margin-bottom:10px}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--accent),#4bd0ff);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700">JS</div>
+      <div>
+        <h1>Actividad</h1>
+        <div class="small">Incluye: hover swap, setInterval/requestAnimationFrame, zoom on click, rotar, mostrar info, cambiar estilos, filtros dinámicos y galería interactiva.</div>
+        <div style="margin-top:8px;">
+      <a href="http://localhost/proyectoprogramacion/proyectoprogramacion/proyecto_web_final/index.php"
+         style="color:var(--accent);font-weight:bold;text-decoration:none;">
+         ← Volver a mi sitio principal
+      </a>
+    </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section>
+        <div class="gallery">
+          <div class="main-image" id="mainImageWrap" title="Haz clic para hacer zoom / doble clic para rotar">
+            <!-- imagen principal -->
+            <img id="mainImage" src="https://images.unsplash.com/photo-1499084732479-de2c02d45fc4?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="imagen">
+          </div>
+
+          <div class="thumbs" id="thumbs">
+            <!-- miniaturas (usa URLs públicas) -->
+            <img data-src="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="thumb1">
+            <img data-src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="thumb2">
+            <img data-src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="thumb4">
+            <img data-src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="thumb5">
+          </div>
+
+          <div class="info-box" id="infoBox">
+
+          </div>
+        </div>
+      </section>
+
+      <aside class="controls">
+        <div class="section">
+          <div class="row"><button id="prev" class="btn-ghost">◀ Anterior</button><button id="next" class="btn-ghost">Siguiente ▶</button><button id="auto">Iniciar Animación</button></div>
+        </div>
+
+        <div class="section">
+          <label>Zoom (clic para alternar entero / doble clic para rotar)</label>
+          <div class="row" style="margin-top:6px"><button id="toggleZoom">Alternar Zoom</button><button id="toggleRotate">Alternar Giro</button></div>
+        </div>
+
+        <div class="section">
+          <label>Filtros dinámicos</label>
+          <div style="margin-top:8px"><div class="small">Brillo</div><input id="brightness" type="range" min="50" max="150" value="100"></div>
+          <div style="margin-top:8px"><div class="small">Contraste</div><input id="contrast" type="range" min="50" max="150" value="100"></div>
+          <div style="margin-top:8px"><div class="small">Desenfoque (px)</div><input id="blur" type="range" min="0" max="8" value="0"></div>
+        </div>
+
+        <div class="section">
+          <label>Cambiar estilos con botones</label>
+          <div style="margin-top:8px" class="row">
+            <button id="styleWood" class="btn-ghost">Madera</button>
+            <button id="styleLight" class="btn-ghost">Claro</button>
+            <button id="styleDark" class="btn-ghost">Oscuro</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <label>Mostrar información al hacer clic</label>
+          <div style="margin-top:8px" class="row"><button id="showMeta" class="btn-ghost">Mostrar metadatos</button></div>
+        </div>
+
+        <div class="section">
+          <label>Animación con <code>requestAnimationFrame</code> (hover)</label>
+          <div style="margin-top:8px" class="small">Mueve ligeramente la imagen con el mouse para ver la animación suave.</div>
+        </div>
+
+      </aside>
+    </div>
+
+    <footer style="margin-top:12px;font-size:13px;color:var(--muted)"> actividad </footer>
+  </div>
+    <script>
+  // Selecciones
+  const mainImg = document.getElementById('mainImage');
+  const mainWrap = document.getElementById('mainImageWrap');
+  const thumbs = document.getElementById('thumbs');
+  const infoBox = document.getElementById('infoBox');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const autoBtn = document.getElementById('auto');
+
+  // filtros
+  const brightness = document.getElementById('brightness');
+  const contrast = document.getElementById('contrast');
+  const blur = document.getElementById('blur');
+
+  // estilos
+  const styleWood = document.getElementById('styleWood');
+  const styleLight = document.getElementById('styleLight');
+  const styleDark = document.getElementById('styleDark');
+
+  // toggles
+  const toggleZoom = document.getElementById('toggleZoom');
+  const toggleRotate = document.getElementById('toggleRotate');
+  const showMeta = document.getElementById('showMeta');
+
+  // información de cada imagen
+  const imagenes = [
+    {
+      src: "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+      descripcion: "Atardecer reflejado en un lago tranquilo, símbolo de calma y reflexión.",
+      autor: " Equipo",
+    },
+    {
+      src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+      descripcion: "Paisaje montañoso cubierto de niebla, que transmite paz y serenidad.",
+      autor: " Equipo",
+    },
+    {
+      src: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+      descripcion: "Sendero rodeado de árboles, evocando el contacto con la naturaleza.",
+      autor: " Equipo",
+    },
+    {
+      src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+      descripcion: "Ciudad iluminada al anochecer, representando el dinamismo urbano.",
+      autor: "Equipo",
+    }
+  ];
+
+  // miniaturas -> cargar src y eventos
+  const thumbImgs = Array.from(thumbs.querySelectorAll('img'));
+  let current = 0;
+
+  thumbImgs.forEach((t, i) => {
+    t.src = imagenes[i].src;
+    if (i === 0) t.classList.add('active');
+    t.addEventListener('click', () => { setImage(i); });
+    t.addEventListener('mouseenter', () => { t.style.transform = 'scale(1.05)'; });
+    t.addEventListener('mouseleave', () => { t.style.transform = ''; });
+  });
+
+  function setImage(i) {
+    const img = imagenes[i];
+    current = i;
+    mainImg.style.transform = 'scale(1) rotate(0deg)';
+    mainImg.src = img.src;
+    thumbImgs.forEach(x => x.classList.remove('active'));
+    thumbImgs[i].classList.add('active');
+    infoBox.innerHTML = `<strong>Imagen ${i + 1}</strong><br>${img.descripcion}<br><em>Autor: ${img.autor}</em>`;
+  }
+
+  // hover
+  mainWrap.addEventListener('mouseenter', () => {
+    mainImg.style.transform += ' translateY(-4px)';
+    applyFilters();
+  });
+  mainWrap.addEventListener('mouseleave', () => {
+    mainImg.style.transform = mainImg.style.transform.replace(' translateY(-4px)', '');
+    applyFilters();
+  });
+
+  // navegación prev/next
+  prevBtn.addEventListener('click', () => { setImage((current - 1 + thumbImgs.length) % thumbImgs.length); });
+  nextBtn.addEventListener('click', () => { setImage((current + 1) % thumbImgs.length); });
+
+  // animación automática con setInterval
+  let autoInterval = null;
+  autoBtn.addEventListener('click', () => {
+    if (autoInterval) {
+      clearInterval(autoInterval); autoInterval = null; autoBtn.textContent = 'Iniciar Animación';
+    } else {
+      autoInterval = setInterval(() => { setImage((current + 1) % thumbImgs.length); }, 2200);
+      autoBtn.textContent = 'Detener Animación';
+    }
+  });
+
+  // zoom y rotar
+  let zoomed = false, rotated = false;
+  mainWrap.addEventListener('click', () => {
+    zoomed = !zoomed;
+    if (zoomed) { mainImg.style.transform = 'scale(1.8)'; mainImg.style.cursor = 'zoom-out'; }
+    else { mainImg.style.transform = 'scale(1)'; mainImg.style.cursor = 'zoom-in'; }
+  });
+  mainWrap.addEventListener('dblclick', () => {
+    rotated = !rotated;
+    const deg = rotated ? 90 : 0;
+    const scale = zoomed ? 1.8 : 1;
+    mainImg.style.transform = `scale(${scale}) rotate(${deg}deg)`;
+  });
+
+  toggleZoom.addEventListener('click', () => { mainWrap.click(); });
+  toggleRotate.addEventListener('click', () => { mainWrap.dispatchEvent(new Event('dblclick')); });
+
+  // mostrar metadatos
+  showMeta.addEventListener('click', () => {
+    const img = imagenes[current];
+    infoBox.innerHTML = `<strong>Foto ${current + 1}</strong><br>Autor: ${img.autor}<br>Descripción: ${img.descripcion}<br>Fecha: ${new Date().toLocaleString()}`;
+  });
+
+  // filtros dinámicos
+  function applyFilters() {
+    mainImg.style.filter = `brightness(${brightness.value}%) contrast(${contrast.value}%) blur(${blur.value}px)`;
+  }
+  [brightness, contrast, blur].forEach(input => input.addEventListener('input', applyFilters));
+
+  // 🔹 Cambiar estilos de tema
+  function setTheme(type) {
+    const app = document.querySelector('.app');
+    const gallery = document.querySelector('.gallery');
+    if (type === 'wood') {
+      app.style.background = '#fff8f0';
+      gallery.style.background = 'linear-gradient(180deg,#fff2e0,#ffe8cc)';
+      document.body.style.background = 'linear-gradient(180deg,#f9f3e6,#f3e0c0)';
+    } else if (type === 'light') {
+      app.style.background = '#fff';
+      gallery.style.background = 'linear-gradient(180deg,#fbfff8,#f6fff0)';
+      document.body.style.background = 'linear-gradient(180deg,#f4f7f2,#e8efe9)';
+    } else if (type === 'dark') {
+      app.style.background = '#1e1e2f';
+      gallery.style.background = 'linear-gradient(180deg,#2b2b3a,#1e1e2f)';
+      document.body.style.background = 'linear-gradient(180deg,#14141c,#0d0d13)';
+      document.body.style.color = '#eee';
+    }
+  }
+
+  styleWood.addEventListener('click', () => setTheme('wood'));
+  styleLight.addEventListener('click', () => setTheme('light'));
+  styleDark.addEventListener('click', () => setTheme('dark'));
+
+  // animación con requestAnimationFrame
+  let mouseX = 0, mouseY = 0, rafId = null;
+  mainWrap.addEventListener('mousemove', (e) => {
+    const r = mainWrap.getBoundingClientRect();
+    mouseX = (e.clientX - r.left) - r.width / 2;
+    mouseY = (e.clientY - r.top) - r.height / 2;
+    if (!rafId) rafLoop();
+  });
+  mainWrap.addEventListener('mouseleave', () => {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    mainImg.style.transform = 'scale(1)';
+  });
+  function rafLoop() {
+    rafId = requestAnimationFrame(() => {
+      const tx = mouseX * 0.02; const ty = mouseY * 0.02;
+      const scale = zoomed ? 1.8 : 1;
+      const rot = rotated ? 90 : 0;
+      mainImg.style.transform = `translate(${tx}px,${ty}px) scale(${scale}) rotate(${rot}deg)`;
+      rafLoop();
+    });
+  }
+
+  // inicializar
+  setImage(0);
+
+  // teclas
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') prevBtn.click();
+    if (e.key === 'ArrowRight') nextBtn.click();
+    if (e.key === ' ') autoBtn.click();
+  });
+  </script>
+</body>
+</html>
